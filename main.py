@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-import pyrax
 import argparse
+from openstack import connection
 
 
 def parse_arguments():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Clean up files in a Rackspace Cloud Files container",
+        description="Clean up files in an OpenStack Cloud Files container",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -14,21 +14,12 @@ def parse_arguments():
     optional = parser.add_argument_group("optional arguments")
 
     required.add_argument(
-        "--username", required=True, help="Rackspace cloud username", metavar="USERNAME"
-    )
-    required.add_argument(
-        "--api-key", required=True, help="Rackspace API key", metavar="KEY"
-    )
-    required.add_argument(
         "--container-name",
         required=True,
         help="Name of the container to clean up",
         metavar="NAME",
     )
 
-    optional.add_argument(
-        "--region", default="DFW", help="Rackspace region", metavar="REGION"
-    )
     optional.add_argument(
         "--folder-prefix",
         default="",
@@ -38,35 +29,22 @@ def parse_arguments():
     return parser.parse_args()
 
 
-args = parse_arguments()
-
-# Authenticate
-pyrax.set_setting("identity_type", "rackspace")
-pyrax.set_credentials(args.username, args.api_key, region=args.region)
-
-# Connect to Cloud Files
-cf = pyrax.cloudfiles
-
-# Get the container
-container = cf.get_container(args.container_name)
-
-def delete_objects(container, prefix):
+def delete_objects(conn, container_name, prefix):
     """Delete objects in container matching prefix."""
-    objs = container.get_objects(prefix=prefix)
-    for obj in objs:
-        # container.delete_object(obj.name)
+    container = conn.object_store.get_container_objects(container_name, prefix=prefix)
+    
+    for obj in container:
+        # conn.object_store.delete_object(obj, container=container_name)
         print(f"Deleted: {obj.name}")
     print("Cleanup complete.")
+
 
 if __name__ == "__main__":
     args = parse_arguments()
     
-    # Authenticate
-    pyrax.set_setting("identity_type", "rackspace")
-    pyrax.set_credentials(args.username, args.api_key, region=args.region)
-
-    # Connect to Cloud Files and delete objects
-    cf = pyrax.cloudfiles
-    container = cf.get_container(args.container_name)
-    delete_objects(container, args.folder_prefix)
+    # Create connection using standard OpenStack environment variables
+    conn = connection.Connection(cloud='rackspace')
+    
+    # Delete matching objects
+    delete_objects(conn, args.container_name, args.folder_prefix)
 # AI: make the CONTAINER_NAME be provided as an argument to this python script. Do not use sys.argv directly, use the best practice to parse parameters

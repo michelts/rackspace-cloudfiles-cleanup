@@ -1,2 +1,2 @@
-pyrax==1.10.0
-setuptools>=68.2.2  # Explicitly required for Python 3.12+ compatibility
+openstacksdk>=2.0.0
+python-keystoneclient  # Required for Rackspace authentication
