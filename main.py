@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pyrax
 import argparse
 
@@ -49,13 +50,23 @@ cf = pyrax.cloudfiles
 # Get the container
 container = cf.get_container(args.container_name)
 
-# List objects in the folder
-objs = container.get_objects(prefix=args.folder_prefix)
+def delete_objects(container, prefix):
+    """Delete objects in container matching prefix."""
+    objs = container.get_objects(prefix=prefix)
+    for obj in objs:
+        # container.delete_object(obj.name)
+        print(f"Deleted: {obj.name}")
+    print("Cleanup complete.")
 
-# Delete each object
-for obj in objs:
-    # container.delete_object(obj.name)
-    print(f"Deleted: {obj.name}")
+if __name__ == "__main__":
+    args = parse_arguments()
+    
+    # Authenticate
+    pyrax.set_setting("identity_type", "rackspace")
+    pyrax.set_credentials(args.username, args.api_key, region=args.region)
 
-print("Cleanup complete.")
+    # Connect to Cloud Files and delete objects
+    cf = pyrax.cloudfiles
+    container = cf.get_container(args.container_name)
+    delete_objects(container, args.folder_prefix)
 # AI: make the CONTAINER_NAME be provided as an argument to this python script. Do not use sys.argv directly, use the best practice to parse parameters
