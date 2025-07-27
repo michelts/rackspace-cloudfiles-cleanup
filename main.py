@@ -3,6 +3,31 @@ import pyrax
 import argparse
 
 
+class Parser:
+    def __init__(self, args):
+        self.args = args
+        self.container = self.get_cloudfiles_container()
+
+    def cleanup(self):
+        print("Starting cleanup")
+        self.delete_objects(self.args.folder_prefix)
+        self.container.delete()
+        print("Cleanup complete")
+
+    def get_cloudfiles_container(self):
+        pyrax.set_setting("identity_type", "rackspace")
+        pyrax.set_credentials(
+            self.args.username, self.args.api_key, region=self.args.region
+        )
+        return pyrax.cloudfiles.get_container(self.args.container_name)
+
+    def delete_objects(self, prefix):
+        objs = self.container.get_objects(prefix=prefix)
+        for obj in objs:
+            self.container.delete_object(obj.name)
+            print(f"- deleted: {obj.name}")
+
+
 def parse_arguments():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -35,24 +60,8 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_cloudfiles_container(args):
-    pyrax.set_setting("identity_type", "rackspace")
-    pyrax.set_credentials(args.username, args.api_key, region=args.region)
-    return pyrax.cloudfiles.get_container(args.container_name)
-
-
-def delete_objects(container, prefix):
-    objs = container.get_objects(prefix=prefix)
-    print("Starting cleanup")
-    for obj in objs:
-        container.delete_object(obj.name)
-        print(f"- deleted: {obj.name}")
-    print("Cleanup complete")
-
-
 if __name__ == "__main__":
     args = parse_arguments()
-    container = get_cloudfiles_container(args)
-    delete_objects(container, args.folder_prefix)
-    container.delete()
+    parser = Parser(args)
+    parser.cleanup()
     print("Container deleted.")
