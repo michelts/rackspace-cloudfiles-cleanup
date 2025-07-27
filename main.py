@@ -48,11 +48,26 @@ class ContainerDeleter:
 
         async def delete_single_object(obj_name):
             async with semaphore:
-                self.container.delete_object(obj_name)
-                logger.info(f"- deleted: {obj_name}")
+                try:
+                    # Add a timeout of 30 seconds for each deletion
+                    await asyncio.wait_for(
+                        asyncio.to_thread(self.container.delete_object, obj_name),
+                        timeout=30.0
+                    )
+                    logger.info(f"- deleted: {obj_name}")
+                except asyncio.TimeoutError:
+                    logger.error(f"Timeout deleting object: {obj_name}")
+                except Exception as e:
+                    logger.error(f"Error deleting object {obj_name}: {e}")
 
+        # Create tasks for all objects
         tasks = [delete_single_object(obj.name) for obj in objs]
-        await asyncio.gather(*tasks)
+        
+        # Wait for all tasks to complete with a global timeout of 5 minutes
+        try:
+            await asyncio.wait_for(asyncio.gather(*tasks), timeout=300.0)
+        except asyncio.TimeoutError:
+            logger.error("Global timeout reached while deleting objects")
 
 
 def list_containers(cloudfiles_sdk):
