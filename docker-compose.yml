@@ -1,0 +1,9 @@
+services:
+  main:
+    build:
+      context: .
+    image: main
+    volumes:
+      - ./main.py:/srv/main.py
+    tty: true
+    command: bash -c "python main.py"
