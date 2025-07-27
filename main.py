@@ -1,7 +1,15 @@
 #!/usr/bin/env python3
 import pyrax
 import argparse
+import logging
 
+# Set up logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 def get_cloudfiles_sdk(args):
     pyrax.set_setting("identity_type", "rackspace")
@@ -15,11 +23,11 @@ class Parser:
         self.args = args
 
     def cleanup(self):
-        print("Starting cleanup")
+        logger.info("Starting cleanup")
         container = self.get_cloudfiles_container()
         self.delete_objects(container, self.args.folder_prefix)
         container.delete()
-        print("Cleanup complete")
+        logger.info("Cleanup complete")
 
     def get_cloudfiles_container(self):
         return self.cloudfiles_sdk.get_container(self.args.container_name)
@@ -28,14 +36,14 @@ class Parser:
         objs = container.get_objects(prefix=prefix)
         for obj in objs:
             container.delete_object(obj.name)
-            print(f"- deleted: {obj.name}")
+            logger.info(f"- deleted: {obj.name}")
 
 
 def list_containers(cloudfiles_sdk):
     containers = cloudfiles_sdk.list()
-    print("Available containers:")
+    logger.info("Available containers:")
     for container in containers:
-        print(container.name)
+        logger.info(container.name)
 
 
 def parse_arguments():
