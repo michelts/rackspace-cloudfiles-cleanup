@@ -3,7 +3,6 @@ import pyrax
 import argparse
 import logging
 import asyncio
-import aiohttp
 
 
 def get_logger():
@@ -29,30 +28,29 @@ class Parser:
     def __init__(self, cloudfiles_sdk, args):
         self.cloudfiles_sdk = cloudfiles_sdk
         self.args = args
+        self.container = self.get_cloudfiles_container()
 
     def cleanup(self):
         logger.info("Starting cleanup")
-        container = self.get_cloudfiles_container()
-        asyncio.run(self.delete_objects(container, self.args.folder_prefix))
-        container.delete()
+        objs = self.get_deleteable_objects(self.args.folder_prefix)
+        asyncio.run(self.delete_objects(objs))
+        self.container.delete()
         logger.info("Cleanup complete")
 
     def get_cloudfiles_container(self):
         return self.cloudfiles_sdk.get_container(self.args.container_name)
 
-    async def delete_objects(self, container, prefix):
-        objs = container.get_objects(prefix=prefix)
-        if not objs:
-            logger.info("No objects found to delete")
-            return
+    def get_deleteable_objects(self, prefix):
+        return self.container.get_objects(prefix=prefix)
 
+    async def delete_objects(self, objs):
         semaphore = asyncio.Semaphore(10)
-        
+
         async def delete_single_object(obj_name):
             async with semaphore:
                 # Using pyrax synchronous method in async context
                 # In a real implementation, you'd want to use an async HTTP client
-                container.delete_object(obj_name)
+                self.container.delete_object(obj_name)
                 logger.info(f"- deleted: {obj_name}")
 
         tasks = [delete_single_object(obj.name) for obj in objs]
