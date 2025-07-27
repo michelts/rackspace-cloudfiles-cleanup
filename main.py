@@ -24,7 +24,7 @@ def get_cloudfiles_sdk(args):
     return pyrax.cloudfiles
 
 
-class Parser:
+class ContainerDeleter:
     def __init__(self, cloudfiles_sdk, args):
         self.cloudfiles_sdk = cloudfiles_sdk
         self.args = args
@@ -104,5 +104,5 @@ if __name__ == "__main__":
     if args.list_containers:
         list_containers(cloudfiles_sdk)
     else:
-        parser = Parser(cloudfiles_sdk, args)
-        parser.cleanup()
+        deleter = ContainerDeleter(cloudfiles_sdk, args)
+        deleter.cleanup()
