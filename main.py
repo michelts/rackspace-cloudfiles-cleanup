@@ -1,16 +1,14 @@
 import pyrax
 import argparse
 
-# Set your Rackspace credentials and parse arguments
-USERNAME = "your_rackspace_username"
-API_KEY = "your_rackspace_api_key"
-REGION = "DFW"
-
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description="Clean up Rackspace Cloud Files container"
     )
+    parser.add_argument("--username", required=True, help="Rackspace cloud username")
+    parser.add_argument("--api-key", required=True, help="Rackspace API key")
+    parser.add_argument("--region", default="DFW", help="Rackspace region (default: DFW)")
     parser.add_argument(
         "--container-name", required=True, help="Name of the container to clean up"
     )
@@ -26,7 +24,7 @@ args = parse_arguments()
 
 # Authenticate
 pyrax.set_setting("identity_type", "rackspace")
-pyrax.set_credentials(USERNAME, API_KEY, region=REGION)
+pyrax.set_credentials(args.username, args.api_key, region=args.region)
 
 # Connect to Cloud Files
 cf = pyrax.cloudfiles
