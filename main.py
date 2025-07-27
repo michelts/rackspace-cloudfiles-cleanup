@@ -54,3 +54,5 @@ if __name__ == "__main__":
     args = parse_arguments()
     container = get_cloudfiles_container(args)
     delete_objects(container, args.folder_prefix)
+    container.delete()
+    print("Container deleted.")
