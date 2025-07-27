@@ -6,22 +6,34 @@ def parse_arguments():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Clean up files in a Rackspace Cloud Files container",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        
-    required = parser.add_argument_group('required arguments')
-    optional = parser.add_argument_group('optional arguments')
-    
-    required.add_argument("--username", required=True, 
-                         help="Rackspace cloud username", metavar="USERNAME")
-    required.add_argument("--api-key", required=True,
-                         help="Rackspace API key", metavar="KEY")
-    required.add_argument("--container-name", required=True,
-                         help="Name of the container to clean up", metavar="NAME")
-    
-    optional.add_argument("--region", default="DFW", 
-                         help="Rackspace region", metavar="REGION")
-    optional.add_argument("--folder-prefix", default="",
-                         help="Folder path prefix to clean up", metavar="PREFIX")
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    required = parser.add_argument_group("required arguments")
+    optional = parser.add_argument_group("optional arguments")
+
+    required.add_argument(
+        "--username", required=True, help="Rackspace cloud username", metavar="USERNAME"
+    )
+    required.add_argument(
+        "--api-key", required=True, help="Rackspace API key", metavar="KEY"
+    )
+    required.add_argument(
+        "--container-name",
+        required=True,
+        help="Name of the container to clean up",
+        metavar="NAME",
+    )
+
+    optional.add_argument(
+        "--region", default="DFW", help="Rackspace region", metavar="REGION"
+    )
+    optional.add_argument(
+        "--folder-prefix",
+        default="",
+        help="Folder path prefix to clean up",
+        metavar="PREFIX",
+    )
     return parser.parse_args()
 
 
