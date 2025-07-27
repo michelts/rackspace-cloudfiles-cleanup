@@ -39,7 +39,7 @@ objs = container.get_objects(prefix=args.folder_prefix)
 
 # Delete each object
 for obj in objs:
-    container.delete_object(obj.name)
+    # container.delete_object(obj.name)
     print(f"Deleted: {obj.name}")
 
 print("Cleanup complete.")
