@@ -8,7 +8,9 @@ def parse_arguments():
     )
     parser.add_argument("--username", required=True, help="Rackspace cloud username")
     parser.add_argument("--api-key", required=True, help="Rackspace API key")
-    parser.add_argument("--region", default="DFW", help="Rackspace region (default: DFW)")
+    parser.add_argument(
+        "--region", default="DFW", help="Rackspace region (default: DFW)"
+    )
     parser.add_argument(
         "--container-name", required=True, help="Name of the container to clean up"
     )
