@@ -6,11 +6,14 @@ USERNAME = "your_rackspace_username"
 API_KEY = "your_rackspace_api_key"
 REGION = "DFW"
 
-# Set up argument parser
-parser = argparse.ArgumentParser(description='Clean up Rackspace Cloud Files container')
-parser.add_argument('--container-name', required=True, help='Name of the container to clean up')
-parser.add_argument('--folder-prefix', default='', help='Folder path prefix to clean up (default: root)')
-args = parser.parse_args()
+def parse_arguments():
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description='Clean up Rackspace Cloud Files container')
+    parser.add_argument('--container-name', required=True, help='Name of the container to clean up')
+    parser.add_argument('--folder-prefix', default='', help='Folder path prefix to clean up (default: root)')
+    return parser.parse_args()
+
+args = parse_arguments()
 
 # Authenticate
 pyrax.set_setting("identity_type", "rackspace")
