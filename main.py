@@ -26,3 +26,4 @@ for obj in objs:
     print(f"Deleted: {obj.name}")
 
 print("Cleanup complete.")
+# AI: make the CONTAINER_NAME be provided as an argument to this python script. Do not use sys.argv directly, use the best practice to parse parameters
