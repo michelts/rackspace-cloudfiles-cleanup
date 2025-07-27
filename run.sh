@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker compose run --rm main $@
+docker compose run --rm main "$@"
