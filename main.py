@@ -5,11 +5,11 @@ import argparse
 USERNAME = "your_rackspace_username"
 API_KEY = "your_rackspace_api_key"
 REGION = "DFW"
-FOLDER_PREFIX = "your/folder/path/"  # e.g., "backups/old/"
 
 # Set up argument parser
 parser = argparse.ArgumentParser(description='Clean up Rackspace Cloud Files container')
 parser.add_argument('--container-name', required=True, help='Name of the container to clean up')
+parser.add_argument('--folder-prefix', default='', help='Folder path prefix to clean up (default: root)')
 args = parser.parse_args()
 
 # Authenticate
@@ -23,7 +23,7 @@ cf = pyrax.cloudfiles
 container = cf.get_container(args.container_name)
 
 # List objects in the folder
-objs = container.get_objects(prefix=FOLDER_PREFIX)
+objs = container.get_objects(prefix=args.folder_prefix)
 
 # Delete each object
 for obj in objs:
