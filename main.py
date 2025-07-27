@@ -48,8 +48,6 @@ class ContainerDeleter:
 
         async def delete_single_object(obj_name):
             async with semaphore:
-                # Using pyrax synchronous method in async context
-                # In a real implementation, you'd want to use an async HTTP client
                 self.container.delete_object(obj_name)
                 logger.info(f"- deleted: {obj_name}")
 
