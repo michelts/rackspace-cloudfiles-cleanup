@@ -1,11 +1,16 @@
 import pyrax
+import argparse
 
-# Set your Rackspace credentials
+# Set your Rackspace credentials and parse arguments
 USERNAME = "your_rackspace_username"
 API_KEY = "your_rackspace_api_key"
 REGION = "DFW"
-CONTAINER_NAME = "your_container"
 FOLDER_PREFIX = "your/folder/path/"  # e.g., "backups/old/"
+
+# Set up argument parser
+parser = argparse.ArgumentParser(description='Clean up Rackspace Cloud Files container')
+parser.add_argument('--container-name', required=True, help='Name of the container to clean up')
+args = parser.parse_args()
 
 # Authenticate
 pyrax.set_setting("identity_type", "rackspace")
@@ -15,7 +20,7 @@ pyrax.set_credentials(USERNAME, API_KEY, region=REGION)
 cf = pyrax.cloudfiles
 
 # Get the container
-container = cf.get_container(CONTAINER_NAME)
+container = cf.get_container(args.container_name)
 
 # List objects in the folder
 objs = container.get_objects(prefix=FOLDER_PREFIX)
