@@ -4,6 +4,8 @@ import argparse
 import logging
 import asyncio
 
+from pyrax.exceptions import ClientException
+
 
 def get_logger():
     logger = logging.getLogger(__name__)
@@ -32,13 +34,21 @@ class ContainerDeleter:
 
     def cleanup(self):
         logger.info("Starting cleanup")
-        objs = self.get_deleteable_objects(self.args.folder_prefix)
-        asyncio.run(self.delete_objects(objs))
-        self.container.delete()
+        self.run_concurrent_delete(self.args.folder_prefix)
+        try:
+            self.container.delete()
+        except ClientException:
+            logger.info("Retry")
+            self.run_concurrent_delete(self.args.folder_prefix)
+            self.container.delete()
         logger.info("Cleanup complete")
 
     def get_cloudfiles_container(self):
         return self.cloudfiles_sdk.get_container(self.args.container_name)
+
+    def run_concurrent_delete(self, prefix):
+        objs = self.get_deleteable_objects(prefix)
+        asyncio.run(self.delete_objects(objs))
 
     def get_deleteable_objects(self, prefix):
         return self.container.get_objects(prefix=prefix)
@@ -49,10 +59,10 @@ class ContainerDeleter:
         async def delete_single_object(obj_name):
             async with semaphore:
                 try:
-                    # Add a timeout of 30 seconds for each deletion
+                    timeout_seconds = 5
                     await asyncio.wait_for(
                         asyncio.to_thread(self.container.delete_object, obj_name),
-                        timeout=30.0
+                        timeout=timeout_seconds,
                     )
                     logger.info(f"- deleted: {obj_name}")
                 except asyncio.TimeoutError:
@@ -62,7 +72,7 @@ class ContainerDeleter:
 
         # Create tasks for all objects
         tasks = [delete_single_object(obj.name) for obj in objs]
-        
+
         # Wait for all tasks to complete with a global timeout of 5 minutes
         try:
             await asyncio.wait_for(asyncio.gather(*tasks), timeout=300.0)
