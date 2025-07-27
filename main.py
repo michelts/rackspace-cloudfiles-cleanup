@@ -35,17 +35,12 @@ def parse_arguments():
     return parser.parse_args()
 
 
-args = parse_arguments()
-
-# Authenticate
-pyrax.set_setting("identity_type", "rackspace")
-pyrax.set_credentials(args.username, args.api_key, region=args.region)
-
-# Connect to Cloud Files
-cf = pyrax.cloudfiles
-
-# Get the container
-container = cf.get_container(args.container_name)
+def get_container(username, api_key, container_name, region):
+    """Get a Rackspace Cloud Files container."""
+    pyrax.set_setting("identity_type", "rackspace")
+    pyrax.set_credentials(username, api_key, region=region)
+    cf = pyrax.cloudfiles
+    return cf.get_container(container_name)
 
 
 def delete_objects(container, prefix):
@@ -60,11 +55,8 @@ def delete_objects(container, prefix):
 if __name__ == "__main__":
     args = parse_arguments()
 
-    # Authenticate
-    pyrax.set_setting("identity_type", "rackspace")
-    pyrax.set_credentials(args.username, args.api_key, region=args.region)
+    # Get the container
+    container = get_container(args.username, args.api_key, args.container_name, args.region)
 
-    # Connect to Cloud Files and delete objects
-    cf = pyrax.cloudfiles
-    container = cf.get_container(args.container_name)
+    # Delete objects
     delete_objects(container, args.folder_prefix)
