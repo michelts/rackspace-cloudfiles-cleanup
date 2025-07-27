@@ -1,1 +1,1 @@
-pyrax
+pyrax==1.10.0
